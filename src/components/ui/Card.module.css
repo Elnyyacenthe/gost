@@ -1,0 +1,60 @@
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Variants */
+.default {
+  background: var(--surface);
+}
+
+.glass {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.elevated {
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Hover effect */
+.hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--primary);
+}
+
+/* Glow effect */
+.glow {
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+}
+
+.glow:hover {
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.3);
+}
+
+/* Clickable */
+.clickable {
+  cursor: pointer;
+}
+
+/* Gradient border */
+.gradientBorder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient, linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%));
+}

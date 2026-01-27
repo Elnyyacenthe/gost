@@ -1,0 +1,302 @@
+.main {
+  padding-top: 100px;
+  padding-bottom: 60px;
+  min-height: 100vh;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: 30px;
+  transition: color 0.3s ease;
+}
+
+.backLink:hover {
+  color: var(--primary);
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 30px;
+  align-items: start;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cardContent {
+  padding: 32px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.logoWrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+}
+
+.headerInfo {
+  flex: 1;
+}
+
+.name {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+}
+
+.rating span {
+  margin-left: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.bonus {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-lg);
+  margin-bottom: 30px;
+}
+
+.bonus svg {
+  color: var(--primary);
+}
+
+.bonusLabel {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.bonusValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.description {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 30px;
+}
+
+.features h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.features ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.features li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.features li svg {
+  color: var(--primary);
+}
+
+.infoCard h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.infoItem svg {
+  color: var(--primary);
+}
+
+.infoLabel {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.infoValue {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.right {
+  position: sticky;
+  top: 100px;
+}
+
+.stickyCard .cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.promoCode {
+  text-align: center;
+}
+
+.codeLabel {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.codeBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--surface-light);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.code {
+  font-family: monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 3px;
+}
+
+.copyButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+}
+
+.copyButton:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.copiedMessage {
+  display: block;
+  margin-top: 12px;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.visitLink {
+  width: 100%;
+}
+
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.notFound {
+  text-align: center;
+  padding: 100px 20px;
+}
+
+.notFound h1 {
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+@media (max-width: 1000px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .right {
+    position: static;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .name {
+    font-size: 1.5rem;
+  }
+
+  .rating {
+    justify-content: center;
+  }
+
+  .bonus {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .code {
+    font-size: 1.5rem;
+  }
+}
