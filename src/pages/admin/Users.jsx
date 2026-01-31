@@ -5,13 +5,11 @@ import {
 } from 'lucide-react';
 import { AdminSidebar } from '../../components/layout';
 import { Card, Button, Input, Modal } from '../../components/ui';
+import { useData } from '../../context/DataContext';
 import styles from './Users.module.css';
 
-// Données initiales vides - L'administrateur doit ajouter les utilisateurs via le dashboard
-const initialUsers = [];
-
 const Users = () => {
-  const [users, setUsers] = useState(initialUsers);
+  const { users, addUser, updateUser, deleteUser: removeUser } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -52,33 +50,25 @@ const Users = () => {
 
   const handleSave = () => {
     if (editingUser) {
-      setUsers(prev => prev.map(u =>
-        u.id === editingUser.id ? { ...u, ...formData } : u
-      ));
+      updateUser(editingUser.id, formData);
     } else {
-      const newUser = {
-        id: Math.max(...users.map(u => u.id)) + 1,
-        ...formData,
-        lastLogin: null,
-        createdAt: new Date().toISOString().split('T')[0],
-        avatar: null
-      };
-      setUsers(prev => [...prev, newUser]);
+      addUser(formData);
     }
     setIsModalOpen(false);
   };
 
   const handleDelete = (id) => {
-    setUsers(prev => prev.filter(u => u.id !== id));
+    removeUser(id);
     setDeleteConfirm(null);
   };
 
   const handleToggleStatus = (userId) => {
-    setUsers(prev => prev.map(u =>
-      u.id === userId
-        ? { ...u, status: u.status === 'active' ? 'inactive' : 'active' }
-        : u
-    ));
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      updateUser(userId, {
+        status: user.status === 'active' ? 'inactive' : 'active'
+      });
+    }
   };
 
   const getRoleIcon = (role) => {

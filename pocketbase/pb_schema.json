@@ -1,0 +1,135 @@
+[
+  {
+    "name": "bookmakers",
+    "type": "base",
+    "schema": [
+      { "name": "name", "type": "text", "required": true },
+      { "name": "logo", "type": "text" },
+      { "name": "bonus", "type": "text" },
+      { "name": "description", "type": "text" },
+      { "name": "rating", "type": "number" },
+      { "name": "affiliateUrl", "type": "url" },
+      { "name": "features", "type": "json" },
+      { "name": "color", "type": "text" },
+      { "name": "clicks", "type": "number" },
+      { "name": "conversions", "type": "number" },
+      { "name": "isActive", "type": "bool" }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "name": "stats",
+    "type": "base",
+    "schema": [
+      { "name": "totalVisitors", "type": "number" },
+      { "name": "totalClicks", "type": "number" },
+      { "name": "totalConversions", "type": "number" },
+      { "name": "conversionRate", "type": "number" },
+      { "name": "revenue", "type": "number" }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "name": "activities",
+    "type": "base",
+    "schema": [
+      { "name": "type", "type": "text" },
+      { "name": "message", "type": "text" },
+      { "name": "icon", "type": "text" },
+      { "name": "time", "type": "text" }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "name": "analytics",
+    "type": "base",
+    "schema": [
+      { "name": "name", "type": "text" },
+      { "name": "dayIndex", "type": "number" },
+      { "name": "visits", "type": "number" },
+      { "name": "clicks", "type": "number" },
+      { "name": "conversions", "type": "number" }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "name": "admin_users",
+    "type": "base",
+    "schema": [
+      { "name": "name", "type": "text", "required": true },
+      { "name": "email", "type": "email", "required": true },
+      { "name": "role", "type": "text" },
+      { "name": "status", "type": "text" },
+      { "name": "lastLogin", "type": "date" }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "name": "notifications",
+    "type": "base",
+    "schema": [
+      { "name": "type", "type": "text" },
+      { "name": "title", "type": "text" },
+      { "name": "message", "type": "text" },
+      { "name": "icon", "type": "text" },
+      { "name": "color", "type": "text" },
+      { "name": "read", "type": "bool" },
+      { "name": "time", "type": "text" }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "name": "settings",
+    "type": "base",
+    "schema": [
+      { "name": "profile", "type": "json" },
+      { "name": "site", "type": "json" },
+      { "name": "notifications", "type": "json" }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  },
+  {
+    "name": "contact_messages",
+    "type": "base",
+    "schema": [
+      { "name": "name", "type": "text", "required": true },
+      { "name": "email", "type": "email", "required": true },
+      { "name": "subject", "type": "text" },
+      { "name": "message", "type": "text", "required": true },
+      { "name": "read", "type": "bool" }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": ""
+  }
+]

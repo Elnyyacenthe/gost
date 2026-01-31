@@ -46,6 +46,21 @@
   color: var(--primary);
 }
 
+.dateSelect {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
+.dateSelect option {
+  background: var(--surface);
+  color: var(--text);
+}
+
 .chartsGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

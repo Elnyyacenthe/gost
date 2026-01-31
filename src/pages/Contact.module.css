@@ -74,6 +74,18 @@
   gap: 20px;
 }
 
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius);
+  color: #ef4444;
+  font-size: 0.9rem;
+}
+
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;

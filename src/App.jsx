@@ -11,7 +11,8 @@ import {
   Settings,
   Users,
   Reports,
-  Notifications
+  Notifications,
+  Messages
 } from './pages/admin';
 import './index.css';
 
@@ -67,6 +68,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Reports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/messages"
+              element={
+                <ProtectedRoute>
+                  <Messages />
                 </ProtectedRoute>
               }
             />

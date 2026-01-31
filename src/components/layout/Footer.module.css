@@ -75,6 +75,17 @@
   transform: translateY(-3px);
 }
 
+.socialDisabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.socialDisabled:hover {
+  background: var(--surface-light);
+  color: var(--text-muted);
+  transform: none;
+}
+
 .links {
   display: flex;
   flex-direction: column;

@@ -8,15 +8,18 @@ import {
   LogOut,
   Zap,
   Bell,
-  FileText
+  FileText,
+  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useData } from '../../context/DataContext';
 import styles from './AdminSidebar.module.css';
 
 const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const { settings } = useData();
 
   const menuItems = [
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
@@ -24,6 +27,7 @@ const AdminSidebar = () => {
     { path: '/admin/analytics', icon: BarChart3, label: 'Analytiques' },
     { path: '/admin/users', icon: Users, label: 'Utilisateurs' },
     { path: '/admin/reports', icon: FileText, label: 'Rapports' },
+    { path: '/admin/messages', icon: MessageSquare, label: 'Messages' },
     { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
     { path: '/admin/settings', icon: Settings, label: 'Paramètres' },
   ];
@@ -52,10 +56,10 @@ const AdminSidebar = () => {
 
       <div className={styles.user}>
         <div className={styles.avatar}>
-          {user?.name?.charAt(0) || 'A'}
+          {(settings?.profile?.name || user?.name || 'A').charAt(0)}
         </div>
         <div className={styles.userInfo}>
-          <span className={styles.userName}>{user?.name || 'Admin'}</span>
+          <span className={styles.userName}>{settings?.profile?.name || user?.name || 'Admin'}</span>
           <span className={styles.userRole}>Administrateur</span>
         </div>
       </div>

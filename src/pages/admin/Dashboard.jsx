@@ -1,6 +1,6 @@
 import {
   Users, MousePointerClick, TrendingUp, DollarSign,
-  ArrowUpRight, ArrowDownRight, Eye
+  ArrowUpRight, ArrowDownRight, Eye, Plus, Trash2
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { AdminSidebar } from '../../components/layout';
@@ -8,39 +8,78 @@ import { Card } from '../../components/ui';
 import { useData } from '../../context/DataContext';
 import styles from './Dashboard.module.css';
 
+// Map des icônes pour les activités
+const activityIcons = {
+  click: MousePointerClick,
+  conversion: TrendingUp,
+  add: Plus,
+  delete: Trash2
+};
+
 const Dashboard = () => {
-  const { bookmakers, stats, activities, analytics } = useData();
+  const { bookmakers, stats, activities, analytics, isLoading, dbError } = useData();
+
+  // Afficher un loader ou une erreur
+  if (isLoading) {
+    return (
+      <div className={styles.layout}>
+        <AdminSidebar />
+        <main className={styles.main}>
+          <div className={styles.loading}>Chargement des données...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (dbError) {
+    return (
+      <div className={styles.layout}>
+        <AdminSidebar />
+        <main className={styles.main}>
+          <div className={styles.error}>
+            <h2>Erreur de connexion</h2>
+            <p>{dbError}</p>
+            <p>Lancez PocketBase avec: <code>npm run pocketbase</code></p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Calculer les revenus à partir des conversions
+  const totalConversions = bookmakers.reduce((sum, b) => sum + (b.conversions || 0), 0);
+  const calculatedRevenue = totalConversions * 15 * 655; // 15€ par conversion en FCFA
 
   const statCards = [
     {
       title: 'Visiteurs totaux',
-      value: stats.totalVisitors.toLocaleString(),
-      change: '+12.5%',
-      positive: true,
+      value: (stats.totalVisitors || 0).toLocaleString(),
+      change: stats.totalVisitors > 0 ? '+12.5%' : '-',
+      positive: stats.totalVisitors > 0,
       icon: Users,
       color: '#10B981'
     },
     {
       title: 'Clics totaux',
-      value: stats.totalClicks.toLocaleString(),
-      change: '+8.2%',
-      positive: true,
+      value: (stats.totalClicks || 0).toLocaleString(),
+      change: stats.totalClicks > 0 ? '+8.2%' : '-',
+      positive: stats.totalClicks > 0,
       icon: MousePointerClick,
       color: '#3B82F6'
     },
     {
       title: 'Conversions',
-      value: stats.totalConversions.toLocaleString(),
-      change: '+15.3%',
-      positive: true,
+      value: (stats.totalConversions || 0).toLocaleString(),
+      change: stats.totalConversions > 0 ? '+15.3%' : '-',
+      positive: stats.totalConversions > 0,
       icon: TrendingUp,
       color: '#F59E0B'
     },
     {
       title: 'Revenus estimés',
-      value: `${(stats.revenue * 655).toLocaleString()} FCFA`,
-      change: '-2.4%',
-      positive: false,
+      value: `${calculatedRevenue.toLocaleString()} FCFA`,
+      change: calculatedRevenue > 0 ? '+10.2%' : '-',
+      positive: calculatedRevenue > 0,
       icon: DollarSign,
       color: '#8B5CF6'
     }
@@ -159,30 +198,38 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {bookmakers.map(bookmaker => {
-                    const rate = ((bookmaker.stats.conversions / bookmaker.stats.clicks) * 100).toFixed(1);
+                  {bookmakers.length > 0 ? bookmakers.map(bookmaker => {
+                    const clicks = bookmaker.clicks || 0;
+                    const conversions = bookmaker.conversions || 0;
+                    const rate = clicks > 0 ? ((conversions / clicks) * 100).toFixed(1) : '0.0';
                     return (
                       <tr key={bookmaker.id}>
                         <td>
                           <div className={styles.bookmakerCell}>
                             <div
                               className={styles.bookmakerLogo}
-                              style={{ background: bookmaker.gradient }}
+                              style={{ background: bookmaker.gradient || bookmaker.color || '#3B82F6' }}
                             >
                               {bookmaker.name.charAt(0)}
                             </div>
                             <span>{bookmaker.name}</span>
                           </div>
                         </td>
-                        <td>{bookmaker.stats.users.toLocaleString()}</td>
-                        <td>{bookmaker.stats.clicks.toLocaleString()}</td>
-                        <td>{bookmaker.stats.conversions.toLocaleString()}</td>
+                        <td>{(bookmaker.users || 0).toLocaleString()}</td>
+                        <td>{clicks.toLocaleString()}</td>
+                        <td>{conversions.toLocaleString()}</td>
                         <td>
                           <span className={styles.rate}>{rate}%</span>
                         </td>
                       </tr>
                     );
-                  })}
+                  }) : (
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: '#94A3B8' }}>
+                        Aucun bookmaker ajouté. Allez dans "Bookmakers" pour en ajouter.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -192,26 +239,35 @@ const Dashboard = () => {
             <div className={styles.activityContent}>
               <h3>Activité récente</h3>
               <div className={styles.activityList}>
-                {activities.map(activity => (
-                  <div key={activity.id} className={styles.activityItem}>
-                    <div className={`${styles.activityIcon} ${styles[activity.type]}`}>
-                      {activity.type === 'click' ? (
-                        <MousePointerClick size={16} />
-                      ) : (
-                        <TrendingUp size={16} />
-                      )}
+                {activities.length > 0 ? activities.slice(0, 10).map(activity => {
+                  const Icon = activityIcons[activity.type] || MousePointerClick;
+                  const typeLabels = {
+                    click: 'Clic',
+                    conversion: 'Conversion',
+                    add: 'Ajout',
+                    delete: 'Suppression'
+                  };
+                  return (
+                    <div key={activity.id} className={styles.activityItem}>
+                      <div className={`${styles.activityIcon} ${styles[activity.type] || ''}`}>
+                        <Icon size={16} />
+                      </div>
+                      <div className={styles.activityInfo}>
+                        <span className={styles.activityType}>
+                          {typeLabels[activity.type] || activity.type}
+                        </span>
+                        <span className={styles.activityBookmaker}>
+                          {activity.message || `${activity.bookmaker || ''} ${activity.country ? '- ' + activity.country : ''}`}
+                        </span>
+                      </div>
+                      <span className={styles.activityTime}>{activity.time}</span>
                     </div>
-                    <div className={styles.activityInfo}>
-                      <span className={styles.activityType}>
-                        {activity.type === 'click' ? 'Clic' : 'Conversion'}
-                      </span>
-                      <span className={styles.activityBookmaker}>
-                        {activity.bookmaker} - {activity.country}
-                      </span>
-                    </div>
-                    <span className={styles.activityTime}>{activity.time}</span>
+                  );
+                }) : (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: '#94A3B8' }}>
+                    Aucune activité récente
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </Card>

@@ -1,0 +1,308 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--dark-950);
+}
+
+.main {
+  flex: 1;
+  padding: 2rem;
+  margin-left: 280px;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--dark-400);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.unreadBadge {
+  background: var(--primary);
+  color: var(--dark-950);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.messagesCard {
+  background: var(--dark-900);
+  border: 1px solid var(--dark-800);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cardHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--dark-800);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.searchWrapper {
+  max-width: 400px;
+}
+
+.filterTabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filterTab {
+  background: transparent;
+  border: none;
+  color: var(--dark-400);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.filterTab:hover {
+  background: var(--dark-800);
+  color: var(--white);
+}
+
+.filterTab.active {
+  background: var(--primary);
+  color: var(--dark-950);
+  font-weight: 600;
+}
+
+.messagesList {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.messageItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--dark-800);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.messageItem:hover {
+  background: var(--dark-850);
+}
+
+.messageItem.unread {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.messageItem.unread:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.messageIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--dark-800);
+  color: var(--dark-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.messageItem.unread .messageIcon {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--primary);
+}
+
+.messageContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.messageHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.messageName {
+  font-weight: 600;
+  color: var(--white);
+}
+
+.messageEmail {
+  color: var(--dark-400);
+  font-size: 0.875rem;
+}
+
+.messageSubject {
+  font-weight: 500;
+  color: var(--dark-300);
+  margin-bottom: 0.25rem;
+}
+
+.messagePreview {
+  color: var(--dark-500);
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.messageInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.messageTime {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--dark-500);
+  font-size: 0.75rem;
+}
+
+.newBadge {
+  background: var(--primary);
+  color: var(--dark-950);
+  padding: 0.125rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: var(--dark-500);
+  gap: 1rem;
+}
+
+.empty svg {
+  opacity: 0.5;
+}
+
+/* Message Detail Modal */
+.messageDetail {
+  padding: 1rem 0;
+}
+
+.detailHeader {
+  border-bottom: 1px solid var(--dark-800);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detailInfo h3 {
+  font-size: 1.25rem;
+  color: var(--white);
+  margin-bottom: 0.75rem;
+}
+
+.detailInfo p {
+  color: var(--dark-400);
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.detailInfo strong {
+  color: var(--dark-300);
+}
+
+.detailBody {
+  background: var(--dark-850);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.detailBody p {
+  color: var(--dark-200);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.detailActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* Delete Modal */
+.deleteModal {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.deleteModal p {
+  color: var(--dark-300);
+  margin-bottom: 1.5rem;
+}
+
+.deleteActions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .main {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 1rem;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+  }
+
+  .searchWrapper {
+    max-width: 100%;
+  }
+
+  .filterTabs {
+    flex-wrap: wrap;
+  }
+
+  .messageItem {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .messageInfo {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+  }
+}

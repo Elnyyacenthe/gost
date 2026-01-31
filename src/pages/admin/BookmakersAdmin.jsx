@@ -6,7 +6,7 @@ import { useData } from '../../context/DataContext';
 import styles from './BookmakersAdmin.module.css';
 
 const BookmakersAdmin = () => {
-  const { bookmakers, updateBookmaker, addBookmaker, deleteBookmaker } = useData();
+  const { bookmakers, updateBookmaker, addBookmaker, deleteBookmaker, isLoading, dbError } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,23 +59,26 @@ const BookmakersAdmin = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = () => {
-    const data = {
+  const handleSave = async () => {
+    const baseData = {
       ...formData,
-      gradient: `linear-gradient(135deg, ${formData.color} 0%, ${formData.color}CC 100%)`,
-      stats: { users: 0, clicks: 0, conversions: 0 }
+      gradient: `linear-gradient(135deg, ${formData.color} 0%, ${formData.color}CC 100%)`
     };
 
-    if (editingId) {
-      updateBookmaker(editingId, data);
-    } else {
-      addBookmaker(data);
+    try {
+      if (editingId) {
+        await updateBookmaker(editingId, baseData);
+      } else {
+        await addBookmaker(baseData);
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Erreur sauvegarde:', error);
     }
-    setIsModalOpen(false);
   };
 
-  const handleDelete = (id) => {
-    deleteBookmaker(id);
+  const handleDelete = async (id) => {
+    await deleteBookmaker(id);
     setDeleteConfirm(null);
   };
 
@@ -83,6 +86,33 @@ const BookmakersAdmin = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
+  if (isLoading) {
+    return (
+      <div className={styles.layout}>
+        <AdminSidebar />
+        <main className={styles.main}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', color: 'var(--text-muted)' }}>
+            Chargement...
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (dbError) {
+    return (
+      <div className={styles.layout}>
+        <AdminSidebar />
+        <main className={styles.main}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '50vh', gap: '1rem', textAlign: 'center' }}>
+            <h2 style={{ color: 'var(--danger)' }}>Erreur de connexion</h2>
+            <p style={{ color: 'var(--text-muted)' }}>{dbError}</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.layout}>
@@ -144,15 +174,15 @@ const BookmakersAdmin = () => {
 
                 <div className={styles.stats}>
                   <div className={styles.stat}>
-                    <span className={styles.statValue}>{bookmaker.stats.users.toLocaleString()}</span>
+                    <span className={styles.statValue}>{(bookmaker.users || 0).toLocaleString()}</span>
                     <span className={styles.statLabel}>Utilisateurs</span>
                   </div>
                   <div className={styles.stat}>
-                    <span className={styles.statValue}>{bookmaker.stats.clicks.toLocaleString()}</span>
+                    <span className={styles.statValue}>{(bookmaker.clicks || 0).toLocaleString()}</span>
                     <span className={styles.statLabel}>Clics</span>
                   </div>
                   <div className={styles.stat}>
-                    <span className={styles.statValue}>{bookmaker.stats.conversions.toLocaleString()}</span>
+                    <span className={styles.statValue}>{(bookmaker.conversions || 0).toLocaleString()}</span>
                     <span className={styles.statLabel}>Conversions</span>
                   </div>
                 </div>

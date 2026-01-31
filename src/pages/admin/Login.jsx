@@ -26,7 +26,7 @@ const Login = () => {
     setLoading(true);
     setError('');
 
-    const result = login(formData.email, formData.password);
+    const result = await login(formData.email, formData.password);
 
     if (result.success) {
       navigate('/admin');

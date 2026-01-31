@@ -2,17 +2,35 @@ import { useState } from 'react';
 import {
   Bell, Check, Trash2, Settings, Filter, CheckCheck,
   TrendingUp, UserPlus, AlertCircle, DollarSign, MessageSquare,
-  Clock, MoreVertical, Archive, Eye
+  Clock, MoreVertical, Archive, Eye, Plus, MousePointerClick
 } from 'lucide-react';
 import { AdminSidebar } from '../../components/layout';
 import { Card, Button } from '../../components/ui';
+import { useData } from '../../context/DataContext';
 import styles from './Notifications.module.css';
 
-// Données initiales vides - L'administrateur verra les notifications au fur et à mesure
-const initialNotifications = [];
+// Map des icônes
+const iconMap = {
+  TrendingUp,
+  UserPlus,
+  AlertCircle,
+  DollarSign,
+  MessageSquare,
+  Plus,
+  MousePointerClick,
+  Bell
+};
 
 const Notifications = () => {
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const {
+    notifications,
+    markNotificationRead,
+    markAllNotificationsRead,
+    deleteNotification,
+    setNotifications,
+    settings,
+    updateSettings
+  } = useData();
   const [filter, setFilter] = useState('all');
   const [selectedNotifications, setSelectedNotifications] = useState([]);
 
@@ -25,25 +43,19 @@ const Notifications = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleMarkAsRead = (id) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
-    );
+    markNotificationRead(id);
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications(prev =>
-      prev.map(n => ({ ...n, read: true }))
-    );
+    markAllNotificationsRead();
   };
 
   const handleDelete = (id) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    deleteNotification(id);
   };
 
   const handleDeleteSelected = () => {
-    setNotifications(prev =>
-      prev.filter(n => !selectedNotifications.includes(n.id))
-    );
+    selectedNotifications.forEach(id => deleteNotification(id));
     setSelectedNotifications([]);
   };
 
@@ -64,19 +76,40 @@ const Notifications = () => {
   };
 
   const notificationSettings = [
-    { id: 'conversions', label: 'Conversions', enabled: true },
-    { id: 'users', label: 'Nouveaux utilisateurs', enabled: true },
-    { id: 'alerts', label: 'Alertes système', enabled: true },
-    { id: 'revenue', label: 'Objectifs de revenus', enabled: false },
-    { id: 'messages', label: 'Messages de contact', enabled: true }
+    { id: 'conversions', label: 'Conversions', enabled: settings?.notifications?.conversions ?? true },
+    { id: 'newUsers', label: 'Nouveaux utilisateurs', enabled: settings?.notifications?.newUsers ?? true },
+    { id: 'emailAlerts', label: 'Alertes par email', enabled: settings?.notifications?.emailAlerts ?? true },
+    { id: 'weeklyReport', label: 'Rapport hebdomadaire', enabled: settings?.notifications?.weeklyReport ?? false }
   ];
 
-  const [settings, setSettings] = useState(notificationSettings);
+  const [localSettings, setLocalSettings] = useState(notificationSettings);
 
   const toggleSetting = (id) => {
-    setSettings(prev =>
+    setLocalSettings(prev =>
       prev.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s)
     );
+    // Sauvegarder dans le contexte
+    const setting = localSettings.find(s => s.id === id);
+    if (setting) {
+      updateSettings({
+        notifications: {
+          ...settings.notifications,
+          [id]: !setting.enabled
+        }
+      });
+    }
+  };
+
+  // Calculer les vraies statistiques
+  const today = new Date();
+  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+  const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  const notifStats = {
+    today: notifications.filter(n => new Date(n.createdAt) >= startOfDay).length,
+    week: notifications.filter(n => new Date(n.createdAt) >= startOfWeek).length,
+    month: notifications.filter(n => new Date(n.createdAt) >= startOfMonth).length
   };
 
   return (
@@ -158,7 +191,7 @@ const Notifications = () => {
 
               <div className={styles.notificationsList}>
                 {filteredNotifications.map(notification => {
-                  const Icon = notification.icon;
+                  const Icon = iconMap[notification.icon] || Bell;
                   return (
                     <div
                       key={notification.id}
@@ -175,7 +208,7 @@ const Notifications = () => {
 
                       <div
                         className={styles.notificationIcon}
-                        style={{ background: `${notification.color}20`, color: notification.color }}
+                        style={{ background: `${notification.color || '#3B82F6'}20`, color: notification.color || '#3B82F6' }}
                       >
                         <Icon size={20} />
                       </div>
@@ -231,7 +264,7 @@ const Notifications = () => {
                 <h3>Préférences</h3>
               </div>
               <div className={styles.settingsList}>
-                {settings.map(setting => (
+                {localSettings.map(setting => (
                   <div key={setting.id} className={styles.settingItem}>
                     <span>{setting.label}</span>
                     <label className={styles.toggle}>
@@ -252,15 +285,15 @@ const Notifications = () => {
               <div className={styles.statsList}>
                 <div className={styles.statItem}>
                   <span className={styles.statLabel}>Aujourd'hui</span>
-                  <span className={styles.statValue}>12</span>
+                  <span className={styles.statValue}>{notifStats.today}</span>
                 </div>
                 <div className={styles.statItem}>
                   <span className={styles.statLabel}>Cette semaine</span>
-                  <span className={styles.statValue}>58</span>
+                  <span className={styles.statValue}>{notifStats.week}</span>
                 </div>
                 <div className={styles.statItem}>
                   <span className={styles.statLabel}>Ce mois</span>
-                  <span className={styles.statValue}>234</span>
+                  <span className={styles.statValue}>{notifStats.month}</span>
                 </div>
               </div>
             </Card>

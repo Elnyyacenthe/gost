@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import pb from '../services/pocketbase';
 
 const AuthContext = createContext(null);
 
@@ -15,33 +16,25 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('adminUser');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    if (pb.authStore.isValid) {
+      setUser(pb.authStore.model);
     }
     setLoading(false);
   }, []);
 
-  const login = (email, password) => {
-    // Simulation d'authentification
-    if (email === 'admin@betpromo.com' && password === 'admin123') {
-      const userData = {
-        id: 1,
-        email,
-        name: 'Administrateur',
-        role: 'admin',
-        avatar: null
-      };
-      setUser(userData);
-      localStorage.setItem('adminUser', JSON.stringify(userData));
+  const login = async (email, password) => {
+    try {
+      const authData = await pb.collection('_superusers').authWithPassword(email, password);
+      setUser(authData.record);
       return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
     }
-    return { success: false, error: 'Email ou mot de passe incorrect' };
   };
 
   const logout = () => {
+    pb.authStore.clear();
     setUser(null);
-    localStorage.removeItem('adminUser');
   };
 
   const value = {
