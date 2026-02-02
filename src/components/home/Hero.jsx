@@ -16,7 +16,7 @@ const Hero = () => {
         <div className={styles.content}>
           <div className={styles.badge}>
             <Zap size={16} />
-            <span>Les meilleurs codes promo 2024</span>
+            <span>Les meilleurs codes promo 2026</span>
           </div>
 
           <h1 className={styles.title}>

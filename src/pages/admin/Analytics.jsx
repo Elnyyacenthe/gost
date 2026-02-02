@@ -11,7 +11,7 @@ import { useData } from '../../context/DataContext';
 import styles from './Analytics.module.css';
 
 const Analytics = () => {
-  const { bookmakers, analytics, stats } = useData();
+  const { bookmakers, analytics, stats, monthlyStats } = useData();
   const [dateRange, setDateRange] = useState('30');
 
   // Couleurs par défaut pour les bookmakers sans couleur
@@ -29,26 +29,30 @@ const Analytics = () => {
     conversions: b.conversions || 0
   })).filter(b => b.conversions > 0 || b.taux > 0);
 
-  // Calculer les données mensuelles à partir des vraies stats
-  const totalClicks = bookmakers.reduce((sum, b) => sum + (b.clicks || 0), 0);
-  const totalConversions = bookmakers.reduce((sum, b) => sum + (b.conversions || 0), 0);
+  // Construire les données mensuelles depuis les vraies stats
+  const buildMonthlyData = () => {
+    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
+                        'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+    const now = new Date();
+    const result = [];
 
-  const generateMonthlyData = () => {
-    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'];
-    const baseClicks = Math.max(totalClicks / 6, 10);
-    const baseRevenue = Math.max(totalConversions * 15 / 6, 100);
-
-    return months.map((month, index) => {
-      const multiplier = (index + 1) / 6;
-      return {
-        month,
-        revenus: Math.floor(baseRevenue * multiplier),
-        clics: Math.floor(baseClicks * multiplier)
-      };
-    });
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const month = d.getMonth() + 1;
+      const year = d.getFullYear();
+      const record = monthlyStats.find(
+        ms => ms.month === month && ms.year === year
+      );
+      result.push({
+        month: monthNames[month - 1],
+        revenus: record ? (record.conversions || 0) * 15 : 0,
+        clics: record ? record.clicks || 0 : 0
+      });
+    }
+    return result;
   };
 
-  const monthlyData = generateMonthlyData();
+  const monthlyData = buildMonthlyData();
 
   // Calculer les sources de trafic (simulé basé sur les données réelles)
   const totalVisits = stats.totalVisitors || analytics.reduce((sum, d) => sum + (d.visits || 0), 0) || 1;

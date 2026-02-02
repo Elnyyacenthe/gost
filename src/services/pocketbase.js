@@ -154,7 +154,7 @@ export const analyticsService = {
 export const usersService = {
   async getAll() {
     try {
-      const records = await pb.collection('admin_users').getFullList({
+      const records = await pb.collection('users').getFullList({
         sort: '-created',
       });
       return records;
@@ -166,7 +166,7 @@ export const usersService = {
 
   async create(data) {
     try {
-      const record = await pb.collection('admin_users').create(data);
+      const record = await pb.collection('users').create(data);
       return record;
     } catch (error) {
       handlePBError(error);
@@ -176,7 +176,7 @@ export const usersService = {
 
   async update(id, data) {
     try {
-      const record = await pb.collection('admin_users').update(id, data);
+      const record = await pb.collection('users').update(id, data);
       return record;
     } catch (error) {
       handlePBError(error);
@@ -186,8 +186,42 @@ export const usersService = {
 
   async delete(id) {
     try {
-      await pb.collection('admin_users').delete(id);
+      await pb.collection('users').delete(id);
       return true;
+    } catch (error) {
+      handlePBError(error);
+      throw error;
+    }
+  }
+};
+
+export const monthlyStatsService = {
+  async getAll() {
+    try {
+      const records = await pb.collection('monthly_stats').getFullList({
+        sort: '-year,-month',
+      });
+      return records;
+    } catch (error) {
+      console.error('Error fetching monthly stats:', error);
+      return [];
+    }
+  },
+
+  async create(data) {
+    try {
+      const record = await pb.collection('monthly_stats').create(data);
+      return record;
+    } catch (error) {
+      handlePBError(error);
+      throw error;
+    }
+  },
+
+  async update(id, data) {
+    try {
+      const record = await pb.collection('monthly_stats').update(id, data);
+      return record;
     } catch (error) {
       handlePBError(error);
       throw error;

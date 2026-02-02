@@ -8,7 +8,7 @@ import pb from '../../services/pocketbase';
 import styles from './Settings.module.css';
 
 const Settings = () => {
-  const { user, login } = useAuth();
+  const { user, login, userRole } = useAuth();
   const { settings, updateSettings } = useData();
   const [activeTab, setActiveTab] = useState('profile');
   const [saved, setSaved] = useState(false);
@@ -98,7 +98,12 @@ const Settings = () => {
     setPasswordSaving(true);
 
     try {
-      await pb.collection('_superusers').update(user.id, {
+      // Détecter la collection d'auth de l'utilisateur
+      const authCollection = user?.collectionName === '_superusers' || !user?.role
+        ? '_superusers'
+        : 'users';
+
+      await pb.collection(authCollection).update(user.id, {
         oldPassword: passwords.current,
         password: passwords.new,
         passwordConfirm: passwords.confirm

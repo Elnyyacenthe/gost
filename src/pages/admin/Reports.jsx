@@ -17,7 +17,7 @@ import { useData } from '../../context/DataContext';
 import styles from './Reports.module.css';
 
 const Reports = () => {
-  const { bookmakers, stats, analytics } = useData();
+  const { bookmakers, stats, analytics, monthlyStats } = useData();
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [selectedReport, setSelectedReport] = useState('overview');
   const [exporting, setExporting] = useState(false);
@@ -27,26 +27,51 @@ const Reports = () => {
   const totalConversions = bookmakers.reduce((sum, b) => sum + (b.conversions || 0), 0);
   const totalRevenue = totalConversions * 15 * 655; // 15€ par conversion en FCFA
 
-  // Générer des données mensuelles basées sur les vraies données
-  const generateMonthlyData = () => {
-    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'];
-    const currentMonth = new Date().getMonth();
-    const baseClicks = Math.max(totalClicks / 6, 100);
-    const baseConversions = Math.max(totalConversions / 6, 10);
+  // Construire les données mensuelles depuis les vraies stats
+  const buildMonthlyData = () => {
+    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
+                        'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+    const now = new Date();
+    const result = [];
 
-    return months.map((month, index) => {
-      const multiplier = (index + 1) / 6;
-      return {
-        month,
-        revenus: Math.floor(baseConversions * multiplier * 15),
-        clics: Math.floor(baseClicks * multiplier),
-        conversions: Math.floor(baseConversions * multiplier),
-        visiteurs: Math.floor(stats.totalVisitors * multiplier / 6) || Math.floor(baseClicks * multiplier * 1.5)
-      };
-    });
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const month = d.getMonth() + 1;
+      const year = d.getFullYear();
+      const record = monthlyStats.find(
+        ms => ms.month === month && ms.year === year
+      );
+      result.push({
+        month: monthNames[month - 1],
+        revenus: record ? (record.conversions || 0) * 15 : 0,
+        clics: record ? record.clicks || 0 : 0,
+        conversions: record ? record.conversions || 0 : 0,
+        visiteurs: record ? record.visitors || 0 : 0
+      });
+    }
+    return result;
   };
 
-  const monthlyData = generateMonthlyData();
+  const monthlyData = buildMonthlyData();
+
+  // Calcul du changement mois/mois
+  const computeMonthChange = (field) => {
+    const now = new Date();
+    const thisMonth = monthlyStats.find(
+      ms => ms.month === now.getMonth() + 1 && ms.year === now.getFullYear()
+    );
+    const lastD = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonth = monthlyStats.find(
+      ms => ms.month === lastD.getMonth() + 1 && ms.year === lastD.getFullYear()
+    );
+
+    const current = thisMonth ? (thisMonth[field] || 0) : 0;
+    const previous = lastMonth ? (lastMonth[field] || 0) : 0;
+
+    if (previous === 0) return current > 0 ? '+100%' : '-';
+    const change = ((current - previous) / previous * 100).toFixed(1);
+    return parseFloat(change) >= 0 ? `+${change}%` : `${change}%`;
+  };
 
   const bookmakerPerformance = bookmakers.map(b => ({
     name: b.name,
@@ -66,36 +91,40 @@ const Reports = () => {
   // Calculer les stats réelles
   const conversionRate = totalClicks > 0 ? ((totalConversions / totalClicks) * 100).toFixed(2) : '0.00';
 
+  const revenueChange = computeMonthChange('revenue');
+  const clicksChange = computeMonthChange('clicks');
+  const conversionsChange = computeMonthChange('conversions');
+
   const summaryCards = [
     {
       title: 'Revenus totaux',
       value: `${totalRevenue.toLocaleString()} FCFA`,
-      change: '+18.5%',
-      positive: true,
+      change: revenueChange,
+      positive: !revenueChange.startsWith('-'),
       icon: DollarSign,
       color: '#10B981'
     },
     {
       title: 'Clics totaux',
       value: totalClicks.toLocaleString(),
-      change: '+12.3%',
-      positive: true,
+      change: clicksChange,
+      positive: !clicksChange.startsWith('-'),
       icon: MousePointerClick,
       color: '#3B82F6'
     },
     {
       title: 'Conversions',
       value: totalConversions.toLocaleString(),
-      change: '+22.1%',
-      positive: true,
+      change: conversionsChange,
+      positive: !conversionsChange.startsWith('-'),
       icon: TrendingUp,
       color: '#F59E0B'
     },
     {
       title: 'Taux de conversion',
       value: `${conversionRate}%`,
-      change: totalConversions > 0 ? '+0.3%' : '-',
-      positive: totalConversions > 0,
+      change: totalConversions > 0 ? conversionsChange : '-',
+      positive: totalConversions > 0 && !conversionsChange.startsWith('-'),
       icon: Eye,
       color: '#8B5CF6'
     }
@@ -418,8 +447,14 @@ const Reports = () => {
                     <td className={styles.revenue}>{(b.revenus * 655).toLocaleString()} FCFA</td>
                     <td>
                       <div className={styles.trend}>
-                        <TrendingUp size={16} className={styles.trendUp} />
-                        <span>{b.conversions > 0 ? '+' + Math.floor(Math.random() * 20 + 5) + '%' : '-'}</span>
+                        {b.conversions > 0 ? (
+                          <>
+                            <TrendingUp size={16} className={styles.trendUp} />
+                            <span>{b.taux}%</span>
+                          </>
+                        ) : (
+                          <span>-</span>
+                        )}
                       </div>
                     </td>
                   </tr>

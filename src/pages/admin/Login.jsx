@@ -89,8 +89,7 @@ const Login = () => {
             </form>
 
             <div className={styles.demo}>
-              <p>Identifiants de démonstration :</p>
-              <code>admin@betpromo.com / admin123</code>
+              <p>Connectez-vous avec votre compte administrateur</p>
             </div>
           </div>
         </Card>

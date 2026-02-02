@@ -269,8 +269,8 @@ nginx -v   # nginx/1.x.x
 
 ```bash
 # Creer le repertoire de l'application
-mkdir -p /var/www/betpromo
-cd /var/www/betpromo
+mkdir -p /var/www/betpromo.pro/web/gost
+cd /var/www/betpromo.pro/web/gost
 
 # Cloner le projet (remplacer par votre URL de repo)
 git clone <VOTRE_REPO_URL> .
@@ -286,7 +286,7 @@ npm run build
 
 ```bash
 # Rendre le binaire executable
-chmod +x /var/www/betpromo/pocketbase/pocketbase
+chmod +x /var/www/betpromo.pro/web/gost/pocketbase/pocketbase
 
 # Creer le service systemd
 cat > /etc/systemd/system/pocketbase.service << 'EOF'
@@ -298,19 +298,19 @@ After=network.target
 Type=simple
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/betpromo/pocketbase
-ExecStart=/var/www/betpromo/pocketbase/pocketbase serve --http=127.0.0.1:8090
+WorkingDirectory=/var/www/betpromo.pro/web/gost/pocketbase
+ExecStart=/var/www/betpromo.pro/web/gost/pocketbase/pocketbase serve --http=127.0.0.1:8090
 Restart=always
 RestartSec=5
-StandardOutput=append:/var/log/pocketbase.log
-StandardError=append:/var/log/pocketbase-error.log
+StandardOutput=append:/var/www/betpromo.pro/log/pocketbase.log
+StandardError=append:/var/www/betpromo.pro/log/pocketbase-error.log
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
 # Donner les droits a www-data
-chown -R www-data:www-data /var/www/betpromo/pocketbase
+chown -R www-data:www-data /var/www/betpromo.pro/web/gost/pocketbase
 
 # Activer et demarrer le service
 systemctl daemon-reload
@@ -332,7 +332,7 @@ server {
     server_name betpromo.pro www.betpromo.pro;
 
     # Frontend React (fichiers statiques)
-    root /var/www/betpromo/dist;
+    root /var/www/betpromo.pro/web/gost/dist;
     index index.html;
 
     # Gzip compression
@@ -392,7 +392,7 @@ Avant le build, modifier l'URL de PocketBase pour pointer vers le domaine (via l
 
 ```bash
 # Editer le fichier de service PocketBase
-nano /var/www/betpromo/src/services/pocketbase.js
+nano /var/www/betpromo.pro/web/gost/src/services/pocketbase.js
 ```
 
 Changer la ligne :
@@ -408,7 +408,7 @@ const pb = new PocketBase(
 
 Puis rebuilder :
 ```bash
-cd /var/www/betpromo
+cd /var/www/betpromo.pro/web/gost
 npm run build
 systemctl reload nginx
 ```
@@ -430,7 +430,7 @@ certbot renew --dry-run
 
 ```bash
 # Creer/modifier le super-administrateur
-/var/www/betpromo/pocketbase/pocketbase superuser upsert admin@betpromo.com VOTRE_MOT_DE_PASSE_SECURISE --dir=/var/www/betpromo/pocketbase/pb_data
+/var/www/betpromo.pro/web/gost/pocketbase/pocketbase superuser upsert admin@betpromo.com admin123 --dir=/var/www/betpromo.pro/web/gost/pocketbase/pb_data
 ```
 
 ## Etape 9 : Verification
@@ -457,7 +457,7 @@ Ouvrir dans le navigateur :
 ## Mise a jour de l'application
 
 ```bash
-cd /var/www/betpromo
+cd /var/www/betpromo.pro/web/gost
 
 # Recuperer les changements
 git pull origin main
@@ -479,10 +479,10 @@ systemctl reload nginx
 
 ```bash
 # Sauvegarder la base de donnees
-cp /var/www/betpromo/pocketbase/pb_data/data.db /root/backups/betpromo-$(date +%Y%m%d).db
+cp /var/www/betpromo.pro/web/gost/pocketbase/pb_data/data.db /root/backups/betpromo-$(date +%Y%m%d).db
 
 # Cron automatique (tous les jours a 3h)
-echo "0 3 * * * cp /var/www/betpromo/pocketbase/pb_data/data.db /root/backups/betpromo-\$(date +\%Y\%m\%d).db" | crontab -
+echo "0 3 * * * cp /var/www/betpromo.pro/web/gost/pocketbase/pb_data/data.db /root/backups/betpromo-\$(date +\%Y\%m\%d).db" | crontab -
 mkdir -p /root/backups
 ```
 

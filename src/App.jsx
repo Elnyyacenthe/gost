@@ -42,7 +42,7 @@ function App() {
             <Route
               path="/admin/bookmakers"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['admin', 'editor']}>
                   <BookmakersAdmin />
                 </ProtectedRoute>
               }
@@ -58,7 +58,7 @@ function App() {
             <Route
               path="/admin/users"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['admin']}>
                   <Users />
                 </ProtectedRoute>
               }
@@ -74,7 +74,7 @@ function App() {
             <Route
               path="/admin/messages"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['admin', 'editor']}>
                   <Messages />
                 </ProtectedRoute>
               }
@@ -82,7 +82,7 @@ function App() {
             <Route
               path="/admin/notifications"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['admin', 'editor']}>
                   <Notifications />
                 </ProtectedRoute>
               }
@@ -90,7 +90,7 @@ function App() {
             <Route
               path="/admin/settings"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['admin']}>
                   <Settings />
                 </ProtectedRoute>
               }

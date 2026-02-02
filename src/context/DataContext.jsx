@@ -7,7 +7,8 @@ import {
   usersService,
   notificationsService,
   settingsService,
-  messagesService
+  messagesService,
+  monthlyStatsService
 } from '../services/pocketbase';
 
 const DataContext = createContext(null);
@@ -70,6 +71,7 @@ export const DataProvider = ({ children }) => {
   const [settings, setSettings] = useState(defaultSettings);
   const [settingsId, setSettingsId] = useState(null);
   const [contactMessages, setContactMessages] = useState([]);
+  const [monthlyStats, setMonthlyStats] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dbError, setDbError] = useState(null);
 
@@ -89,7 +91,8 @@ export const DataProvider = ({ children }) => {
           usersData,
           notificationsData,
           settingsData,
-          messagesData
+          messagesData,
+          monthlyStatsData
         ] = await Promise.all([
           bookmarkersService.getAll(),
           statsService.get(),
@@ -98,7 +101,8 @@ export const DataProvider = ({ children }) => {
           usersService.getAll(),
           notificationsService.getAll(),
           settingsService.get(),
-          messagesService.getAll()
+          messagesService.getAll(),
+          monthlyStatsService.getAll()
         ]);
 
         setBookmakers(bookmakersData);
@@ -161,6 +165,7 @@ export const DataProvider = ({ children }) => {
         }
 
         setContactMessages(messagesData);
+        setMonthlyStats(monthlyStatsData);
       } catch (error) {
         console.error('Erreur chargement données:', error);
         setDbError('Impossible de se connecter à PocketBase. Vérifiez que le serveur est lancé.');
@@ -221,6 +226,49 @@ export const DataProvider = ({ children }) => {
       }
     }
   }, [analytics]);
+
+  // Mettre à jour les stats mensuelles
+  const updateMonthlyStats = useCallback(async (type) => {
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+
+    let monthRecord = monthlyStats.find(
+      ms => ms.month === currentMonth && ms.year === currentYear
+    );
+
+    if (monthRecord) {
+      try {
+        const newValue = (monthRecord[type] || 0) + 1;
+        const updateData = { [type]: newValue };
+        if (type === 'conversions') {
+          updateData.revenue = (monthRecord.conversions || 0 + 1) * 15;
+        }
+        await monthlyStatsService.update(monthRecord.id, updateData);
+        setMonthlyStats(prev =>
+          prev.map(ms =>
+            ms.id === monthRecord.id ? { ...ms, ...updateData } : ms
+          )
+        );
+      } catch (error) {
+        console.error('Erreur update monthly stats:', error);
+      }
+    } else {
+      try {
+        const newRecord = await monthlyStatsService.create({
+          month: currentMonth,
+          year: currentYear,
+          clicks: type === 'clicks' ? 1 : 0,
+          conversions: type === 'conversions' ? 1 : 0,
+          visitors: type === 'visitors' ? 1 : 0,
+          revenue: type === 'conversions' ? 15 : 0
+        });
+        setMonthlyStats(prev => [newRecord, ...prev]);
+      } catch (error) {
+        console.error('Erreur creation monthly stats:', error);
+      }
+    }
+  }, [monthlyStats]);
 
   const updateBookmaker = useCallback(async (id, data) => {
     try {
@@ -306,6 +354,7 @@ export const DataProvider = ({ children }) => {
         }
 
         await updateDailyAnalytics('clicks');
+        await updateMonthlyStats('clicks');
 
         await addActivity({
           type: 'click',
@@ -316,7 +365,7 @@ export const DataProvider = ({ children }) => {
         console.error('Erreur enregistrement clic:', error);
       }
     }
-  }, [bookmakers, stats, statsId, updateDailyAnalytics, addActivity]);
+  }, [bookmakers, stats, statsId, updateDailyAnalytics, updateMonthlyStats, addActivity]);
 
   const recordVisit = useCallback(async () => {
     try {
@@ -326,10 +375,11 @@ export const DataProvider = ({ children }) => {
         setStats(prev => ({ ...prev, totalVisitors: newTotalVisitors }));
       }
       await updateDailyAnalytics('visits');
+      await updateMonthlyStats('visitors');
     } catch (error) {
       console.error('Erreur enregistrement visite:', error);
     }
-  }, [stats, statsId, updateDailyAnalytics]);
+  }, [stats, statsId, updateDailyAnalytics, updateMonthlyStats]);
 
   const recordConversion = useCallback(async (bookmakerId) => {
     const bookmaker = bookmakers.find(b => b.id === bookmakerId);
@@ -356,6 +406,7 @@ export const DataProvider = ({ children }) => {
         }
 
         await updateDailyAnalytics('conversions');
+        await updateMonthlyStats('conversions');
 
         await addNotification({
           type: 'conversion',
@@ -374,15 +425,12 @@ export const DataProvider = ({ children }) => {
         console.error('Erreur enregistrement conversion:', error);
       }
     }
-  }, [bookmakers, stats, statsId, updateDailyAnalytics, addNotification, addActivity]);
+  }, [bookmakers, stats, statsId, updateDailyAnalytics, updateMonthlyStats, addNotification, addActivity]);
 
   // Gestion des utilisateurs admin
   const addUser = useCallback(async (userData) => {
     try {
-      const newUser = await usersService.create({
-        ...userData,
-        lastLogin: null
-      });
+      const newUser = await usersService.create(userData);
       setUsers(prev => [...prev, newUser]);
 
       await addNotification({
@@ -523,6 +571,7 @@ export const DataProvider = ({ children }) => {
     notifications,
     settings,
     contactMessages,
+    monthlyStats,
     // Actions bookmakers
     updateBookmaker,
     addBookmaker,

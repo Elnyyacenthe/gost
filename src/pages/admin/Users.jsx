@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Search, Plus, Edit, Trash2, Mail, MoreVertical,
-  UserCheck, UserX, Shield, User, Calendar, Filter
+  UserCheck, UserX, Shield, User, Calendar, Filter, Lock
 } from 'lucide-react';
 import { AdminSidebar } from '../../components/layout';
 import { Card, Button, Input, Modal } from '../../components/ui';
@@ -16,24 +16,28 @@ const Users = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [saveError, setSaveError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
+    passwordConfirm: '',
     role: 'viewer',
     status: 'active'
   });
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         user.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === 'all' || user.role === filterRole;
     const matchesStatus = filterStatus === 'all' || user.status === filterStatus;
     return matchesSearch && matchesRole && matchesStatus;
   });
 
   const handleAdd = () => {
-    setFormData({ name: '', email: '', role: 'viewer', status: 'active' });
+    setFormData({ name: '', email: '', password: '', passwordConfirm: '', role: 'viewer', status: 'active' });
     setEditingUser(null);
+    setSaveError('');
     setIsModalOpen(true);
   };
 
@@ -41,20 +45,67 @@ const Users = () => {
     setFormData({
       name: user.name,
       email: user.email,
-      role: user.role,
-      status: user.status
+      password: '',
+      passwordConfirm: '',
+      role: user.role || 'viewer',
+      status: user.status || 'active'
     });
     setEditingUser(user);
+    setSaveError('');
     setIsModalOpen(true);
   };
 
-  const handleSave = () => {
-    if (editingUser) {
-      updateUser(editingUser.id, formData);
-    } else {
-      addUser(formData);
+  const handleSave = async () => {
+    setSaveError('');
+
+    if (!formData.name || !formData.email) {
+      setSaveError('Nom et email sont requis');
+      return;
     }
-    setIsModalOpen(false);
+
+    try {
+      if (editingUser) {
+        const updateData = {
+          name: formData.name,
+          email: formData.email,
+          role: formData.role,
+          status: formData.status
+        };
+        if (formData.password) {
+          if (formData.password.length < 8) {
+            setSaveError('Le mot de passe doit contenir au moins 8 caractères');
+            return;
+          }
+          if (formData.password !== formData.passwordConfirm) {
+            setSaveError('Les mots de passe ne correspondent pas');
+            return;
+          }
+          updateData.password = formData.password;
+          updateData.passwordConfirm = formData.passwordConfirm;
+        }
+        await updateUser(editingUser.id, updateData);
+      } else {
+        if (!formData.password || formData.password.length < 8) {
+          setSaveError('Le mot de passe doit contenir au moins 8 caractères');
+          return;
+        }
+        if (formData.password !== formData.passwordConfirm) {
+          setSaveError('Les mots de passe ne correspondent pas');
+          return;
+        }
+        await addUser({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          passwordConfirm: formData.passwordConfirm,
+          role: formData.role,
+          status: formData.status
+        });
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      setSaveError(error.message || 'Erreur lors de la sauvegarde');
+    }
   };
 
   const handleDelete = (id) => {
@@ -95,11 +146,22 @@ const Users = () => {
     }
   };
 
-  const stats = {
+  const userStats = {
     total: users.length,
     active: users.filter(u => u.status === 'active').length,
     inactive: users.filter(u => u.status === 'inactive').length,
     pending: users.filter(u => u.status === 'pending').length
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'Jamais';
+    try {
+      return new Date(dateStr).toLocaleDateString('fr-FR', {
+        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+    } catch {
+      return dateStr;
+    }
   };
 
   return (
@@ -123,7 +185,7 @@ const Users = () => {
                 <User size={22} />
               </div>
               <div className={styles.statInfo}>
-                <span className={styles.statValue}>{stats.total}</span>
+                <span className={styles.statValue}>{userStats.total}</span>
                 <span className={styles.statLabel}>Total utilisateurs</span>
               </div>
             </div>
@@ -134,7 +196,7 @@ const Users = () => {
                 <UserCheck size={22} />
               </div>
               <div className={styles.statInfo}>
-                <span className={styles.statValue}>{stats.active}</span>
+                <span className={styles.statValue}>{userStats.active}</span>
                 <span className={styles.statLabel}>Actifs</span>
               </div>
             </div>
@@ -145,7 +207,7 @@ const Users = () => {
                 <UserX size={22} />
               </div>
               <div className={styles.statInfo}>
-                <span className={styles.statValue}>{stats.inactive}</span>
+                <span className={styles.statValue}>{userStats.inactive}</span>
                 <span className={styles.statLabel}>Inactifs</span>
               </div>
             </div>
@@ -156,7 +218,7 @@ const Users = () => {
                 <Calendar size={22} />
               </div>
               <div className={styles.statInfo}>
-                <span className={styles.statValue}>{stats.pending}</span>
+                <span className={styles.statValue}>{userStats.pending}</span>
                 <span className={styles.statLabel}>En attente</span>
               </div>
             </div>
@@ -220,7 +282,7 @@ const Users = () => {
                     <td>
                       <div className={styles.userCell}>
                         <div className={styles.avatar}>
-                          {user.name.charAt(0)}
+                          {(user.name || '?').charAt(0)}
                         </div>
                         <div className={styles.userInfo}>
                           <span className={styles.userName}>{user.name}</span>
@@ -241,11 +303,11 @@ const Users = () => {
                     </td>
                     <td>
                       <span className={styles.date}>
-                        {user.lastLogin || 'Jamais'}
+                        {formatDate(user.lastLogin)}
                       </span>
                     </td>
                     <td>
-                      <span className={styles.date}>{user.createdAt}</span>
+                      <span className={styles.date}>{formatDate(user.created)}</span>
                     </td>
                     <td>
                       <div className={styles.actions}>
@@ -292,6 +354,19 @@ const Users = () => {
           size="medium"
         >
           <div className={styles.form}>
+            {saveError && (
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                color: '#EF4444',
+                fontSize: '0.9rem',
+                marginBottom: '8px'
+              }}>
+                {saveError}
+              </div>
+            )}
             <Input
               label="Nom complet"
               value={formData.name}
@@ -307,6 +382,49 @@ const Users = () => {
               placeholder="email@exemple.com"
               required
             />
+            {!editingUser ? (
+              <>
+                <Input
+                  label="Mot de passe"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="Minimum 8 caractères"
+                  icon={<Lock size={18} />}
+                  required
+                />
+                <Input
+                  label="Confirmer le mot de passe"
+                  type="password"
+                  value={formData.passwordConfirm}
+                  onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })}
+                  placeholder="Confirmer le mot de passe"
+                  icon={<Lock size={18} />}
+                  required
+                />
+              </>
+            ) : (
+              <>
+                <Input
+                  label="Nouveau mot de passe (optionnel)"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="Laisser vide pour ne pas changer"
+                  icon={<Lock size={18} />}
+                />
+                {formData.password && (
+                  <Input
+                    label="Confirmer le mot de passe"
+                    type="password"
+                    value={formData.passwordConfirm}
+                    onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })}
+                    placeholder="Confirmer le mot de passe"
+                    icon={<Lock size={18} />}
+                  />
+                )}
+              </>
+            )}
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label>Rôle</label>
