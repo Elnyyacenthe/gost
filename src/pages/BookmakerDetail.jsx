@@ -11,7 +11,7 @@ const BookmakerDetail = () => {
   const { bookmakers, recordClick } = useData();
   const [copied, setCopied] = useState(false);
 
-  const bookmaker = bookmakers.find(b => b.id === parseInt(id));
+  const bookmaker = bookmakers.find(b => b.id === id);
 
   if (!bookmaker) {
     return (

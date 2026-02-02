@@ -1,6 +1,10 @@
 import PocketBase from 'pocketbase';
 
-const pb = new PocketBase('http://127.0.0.1:8090');
+//const pb = new PocketBase('http://127.0.0.1:8090');
+const pb = new PocketBase(
+  import.meta.env.VITE_PB_URL || 'https://betpromo.pro'
+);
+
 
 // Désactiver l'auto-cancellation pour éviter les problèmes
 pb.autoCancellation(false);
